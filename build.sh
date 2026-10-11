@@ -1,21 +1,21 @@
 #!/bin/sh
+
 # build.sh — Construye el initramfs (disco raíz) de la VM del laboratorio.
 # ======================= VERSIÓN PARA KALI LINUX (estudiantes) =======================
-# (Arch/CachyOS: usa ./build.arch.sh, que es la versión del instructor.)
 #
 # Empaqueta: busybox + el módulo vulnerable (vuln.ko) + el exploit + un init que
 # monta /proc,/sys,/dev, relaja kptr_restrict (para leer /proc/kallsyms) y deja
 # una shell como usuario SIN privilegios (uid 1000), tal como la ve el público.
-#
+
 # Requisitos en Kali:
 #   sudo apt update
 #   sudo apt install -y busybox-static qemu-system-x86 build-essential gdb cpio gzip \
 #                       linux-headers-$(uname -r)
-#
+
 # IMPORTANTE: el initramfs NO tiene librerías, así que busybox debe ser ESTÁTICO.
 # El paquete 'busybox-static' de Kali instala /bin/busybox estático. Si tienes el
 # busybox dinámico normal, la shell de la VM fallará: instala busybox-static.
-#
+
 # Antes de correr este script:
 #   1) make KDIR=/lib/modules/$(uname -r)/build   -> genera vuln.ko
 #   2) gcc -static -no-pie -o exploit exploit.c
@@ -77,11 +77,19 @@ mount -t devtmpfs none /dev
 # Facilitar la demo: permitir que un usuario normal lea /proc/kallsyms.
 echo 0 > /proc/sys/kernel/kptr_restrict       2>/dev/null || true
 echo 0 > /proc/sys/kernel/perf_event_paranoid 2>/dev/null || true
+echo 0 > /proc/sys/kernel/dmesg_restrict        2>/dev/null || true
+
+# Cargar el modulo vulnerable AQUI, como root (este init es PID 1). Un usuario
+# normal (uid 1000) no puede hacer insmod: le falta CAP_SYS_MODULE y obtendria
+# 'Operation not permitted'. Asi que root crea /dev/vuln en el arranque y el
+# estudiante, ya sin privilegios, solo lanza ./exploit contra el.
+insmod /home/user/vuln.ko && echo "  [init] vuln.ko cargado, /dev/vuln listo" \
+                          || echo "  [init] AVISO: no pude cargar vuln.ko"
 
 echo
 echo "  === Laboratorio SheSecures: VM de explotacion de kernel ==="
-echo "  Eres un usuario SIN privilegios. En /home/user tienes vuln.ko y exploit."
-echo "  Demo:   insmod vuln.ko  &&  ./exploit"
+echo "  Eres un usuario SIN privilegios. /dev/vuln ya esta cargado (lo hizo root)."
+echo "  Demo:   ./exploit"
 echo
 
 # Dejar una shell interactiva como usuario 1000 (no root).

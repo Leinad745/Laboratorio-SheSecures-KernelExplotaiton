@@ -1,9 +1,9 @@
 #!/bin/sh
 # run.sh — Arranca la VM del laboratorio en QEMU (versión SIN mitigaciones).
-# ======================= VERSIÓN PARA KALI LINUX (estudiantes) =======================
+
 # (Arch/CachyOS: ./run.arch.sh — es idéntico; la invocación de QEMU no cambia.)
 # En Kali:  sudo apt install -y qemu-system-x86
-# -------------------------------------------------------------------------
+
 # Necesita:
 #   - bzImage           : el kernel a arrancar (ver README: opción A o B)
 #   - initramfs.cpio.gz : el disco raíz (genéralo con ./build.sh)
