@@ -1,13 +1,5 @@
 // vuln.c — Módulo de kernel VULNERABLE ADREDE
 
-// Crea un dispositivo /dev/vuln. Cuando un programa de usuario le ESCRIBE datos,
-// el handler los copia a un buffer de PILA de tamaño fijo SIN comprobar el tamaño.
-// Ese descuido (un copy_from_user sin validar 'count') es el bug que en clase
-// convertiremos en una escalada a root.
-//
-// NUNCA se compila con -fstack-protector aquí: queremos que el desbordamiento
-// alcance la dirección de retorno de forma didáctica (ver Makefile: ccflags-y).
-
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
